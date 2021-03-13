@@ -1,0 +1,15 @@
+[package]
+name = "power"
+version = "0.0.2"
+edition = "2018"
+
+[dependencies]
+power-env = { path = "power-env" }
+power-derive = { path = "power-derive" }
+
+wee_alloc = "*"
+fixed-hash = { version = "0.3", default-features = false, features = ["rustc-hex"] }
+
+corepack = { version = "~0.4.0", default-features = false, features = ["alloc"], path = "corepack" }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+crc = { version = "1.0", default-features = false }
