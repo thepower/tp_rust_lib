@@ -153,6 +153,29 @@ where
     }
 }
 
+pub fn get_entropy() -> Vec<u8> {
+    unsafe {
+        let size = power_env::get_entropy_size();
+        let mut dst: Vec<u8> = Vec::with_capacity(size);
+        power_env::get_entropy(dst.as_mut_ptr());
+        dst.set_len(size);
+        return dst;
+    }
+}
+
+pub fn get_mean_time() -> u64 {
+    unsafe {
+        return power_env::get_mean_time();
+    }
+}
+
+pub fn emit_tx_from_keys(tx: Vec<(Value, Value)>){
+    let enc = serialize(Value::Map(tx));
+    unsafe {
+        power_env::emit_tx(enc.len(), enc.as_ptr());
+    }
+}
+
 pub fn emit_tx(
     kind: TxKind,
     to: Option<Address>,
@@ -163,22 +186,78 @@ pub fn emit_tx(
     let mut v: Vec<(Value, Value)> = Vec::with_capacity(5);
     v.push(("k".into(), (kind as u64).into()));
 
-    if to.is_some() {
-        v.push(("to".into(), to.unwrap().into()));
+    for x in to {
+        v.push(("to".into(), x.into()));
     }
-    if payload.is_some() {
-        v.push(("p".into(), payload.unwrap().into()));
+    for x in payload {
+        v.push(("p".into(), x.into()));
     }
-    if call.is_some() {
-        v.push(("c".into(), call.unwrap().into()));
+    for x in call {
+        v.push(("c".into(), x.into()));
     }
-    if extradata.is_some() {
-        v.push(("e".into(), extradata.unwrap().into()));
+    for x in extradata {
+        v.push(("e".into(), x.into()));
     }
 
-    let enc = serialize(Value::Map(v));
-    unsafe {
-        power_env::emit_tx(enc.len(), enc.as_ptr());
+    emit_tx_from_keys(v);
+}
+
+pub struct TxEmitter {
+    tx: Vec<(Value, Value)>,
+    n: Vec<(Value, Value)>,
+    e: Vec<(Value, Value)>,
+}
+
+impl TxEmitter {
+    pub fn new(kind: TxKind) -> TxEmitter {
+        let mut x = TxEmitter {tx: Vec::with_capacity(5), n: Vec::new(), e: Vec::new()};
+        x.tx.push(("k".into(), (kind as u64).into()));
+        x
+    }
+
+    pub fn to(mut self, addr: Address) -> Self {
+        self.tx.push(("to".into(), addr.into()));
+        self
+    }
+
+    pub fn payload(mut self, payload: Vec<PayloadItem>) -> Self {
+        self.tx.push(("p".into(), payload.into()));
+        self
+    }
+
+    pub fn call(mut self, method: &str, args: Vec<Value>) -> Self {
+        self.tx.push(("c".into(), (method, args).into()));
+        self
+    }
+
+    pub fn not_before(mut self, not_before: u64) -> Self {
+        self.tx.push(("nb".into(), not_before.into()));
+        self
+    }
+
+    pub fn notify_url(mut self, url: &str, data: Vec<u8>) -> Self {
+        self.n.push((url.into(), Value::Binary(data)));
+        self
+    }
+
+    pub fn notify(mut self, idx: u64, data: Vec<u8>) -> Self {
+        self.n.push((idx.into(), Value::Binary(data)));
+        self
+    }
+
+    pub fn extra<T: Into<Value>>(mut self, key: &str, value: T) -> Self {
+        self.e.push((key.into(), value.into()));
+        self
+    }
+
+    pub fn emit(mut self) {
+        if self.n.len() > 0 {
+            self.tx.push(("ev".into(), self.n.into()));
+        }
+        if self.e.len() > 0 {
+            self.tx.push(("e".into(), Value::Map(self.e)));
+        }
+        emit_tx_from_keys(self.tx);
     }
 }
 

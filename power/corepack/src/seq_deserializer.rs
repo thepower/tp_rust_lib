@@ -32,7 +32,7 @@ impl<'de, 'a, R: Read<'de>> SeqDeserializer<'de, 'a, R> {
 
         self.count -= 1;
 
-        Ok(Some(try!(seed.deserialize(&mut *self.de))))
+        Ok(Some(seed.deserialize(&mut *self.de)?))
     }
 }
 

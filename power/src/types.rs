@@ -148,6 +148,9 @@ pub enum TxKind {
     Deploy,
     Patch,
     Block,
+    TStore,
+    LStore,
+    Notify
 }
 
 impl From<TxKind> for Value {
@@ -164,6 +167,9 @@ impl FromValue for TxKind {
                 18 => Some(TxKind::Deploy),
                 19 => Some(TxKind::Patch),
                 20 => Some(TxKind::Block),
+                21 => Some(TxKind::TStore),
+                22 => Some(TxKind::LStore),
+                23 => Some(TxKind::Notify),
                 _ => None,
             }
         } else {
@@ -264,6 +270,7 @@ pub struct Tx {
     pub to: Option<Address>,
     pub payload: Vec<PayloadItem>,
     pub timestamp: u64,
+    //pub not_before: u64,
     pub extradata: BTreeMap<String, Value>,
 }
 
@@ -288,6 +295,7 @@ impl FromValue for Tx {
             };
 
             let timestamp: u64 = from_value(m.get("t").unwrap()).unwrap_or(0);
+            //let not_before: u64 = from_value(m.get("nb").unwrap_or(&Value::Integer(From::from(0)))).unwrap_or(0);
             let extradata: BTreeMap<String, Value> = if m.get("e").is_some() {
                 from_value(m.get("e").unwrap()).unwrap()
             } else {
@@ -299,6 +307,7 @@ impl FromValue for Tx {
                 to: to,
                 payload: payload,
                 timestamp: timestamp,
+                //not_before: not_before,
                 extradata: extradata,
             })
         } else {

@@ -4,7 +4,6 @@
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at https://mozilla.org/MPL/2.0/.
 
-#![cfg_attr(feature = "alloc", feature(alloc))]
 #![allow(overflowing_literals)]
 
 // testing requires std to be available
@@ -65,7 +64,7 @@ pub fn to_bytes<V>(value: V) -> Result<Vec<u8>, error::Error>
 
     {
         let mut ser = Serializer::new();
-        try!(value.serialize(&mut ser));
+        value.serialize(&mut ser)?;
         bytes.extend_from_slice(&ser.output[..]);
     }
 

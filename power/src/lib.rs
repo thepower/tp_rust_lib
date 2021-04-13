@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(alloc)]
 #![feature(allocator_api)]
 #![feature(alloc_error_handler)]
 #![feature(core_intrinsics)]

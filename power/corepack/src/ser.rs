@@ -287,7 +287,7 @@ impl serde::Serializer for &mut Serializer {
 
     fn serialize_seq(self, size: Option<usize>) -> result::Result<Self::SerializeSeq, Self::Error> {
         if let Some(size) = size {
-            try!(self.output_seq_header(size));
+            self.output_seq_header(size)?;
             Ok(self)
         }else{
             Err(Error::BadLength)
@@ -296,7 +296,7 @@ impl serde::Serializer for &mut Serializer {
 
     fn serialize_map(self, size: Option<usize>) -> result::Result<Self::SerializeMap, Self::Error> {
         if let Some(size) = size {
-            try!(self.output_map_header(size));
+            self.output_map_header(size)?;
             Ok(self)
         }else{
             Err(Error::BadLength)
@@ -473,8 +473,8 @@ impl SerializeStruct for &mut Serializer {
     fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Error>
         where T: ?Sized + Serialize
     {
-        try!(Serializer::serialize_element(self, key));
-        try!(Serializer::serialize_element(self, value));
+        Serializer::serialize_element(self, key)?;
+        Serializer::serialize_element(self, value)?;
         Ok(())
     }
 
@@ -491,8 +491,8 @@ impl SerializeStructVariant
     fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Error>
         where T: ?Sized + Serialize
     {
-        try!(Serializer::serialize_element(self, key));
-        try!(Serializer::serialize_element(self, value));
+        Serializer::serialize_element(self, key)?;
+        Serializer::serialize_element(self, value)?;
         Ok(())
     }
 

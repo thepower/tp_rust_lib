@@ -35,10 +35,10 @@ impl<'de, 'a> MapAccess<'de> for ExtDeserializer<'a> {
     {
         if self.state == 0 {
             let de: StrDeserializer<Self::Error> = "type".into_deserializer();
-            Ok(Some(try!(seed.deserialize(de))))
+            Ok(Some(seed.deserialize(de)?))
         } else if self.state == 1 {
             let de: StrDeserializer<Self::Error> = "data".into_deserializer();
-            Ok(Some(try!(seed.deserialize(de))))
+            Ok(Some(seed.deserialize(de)?))
         } else {
             Ok(None)
         }
@@ -50,11 +50,11 @@ impl<'de, 'a> MapAccess<'de> for ExtDeserializer<'a> {
         if self.state == 0 {
             self.state += 1;
             let de: I8Deserializer<Self::Error> = self.ty.into_deserializer();
-            Ok(try!(seed.deserialize(de)))
+            Ok(seed.deserialize(de)?)
         } else if self.state == 1 {
             self.state += 1;
             let de: SeqDeserializer<_, Self::Error> = self.data.to_owned().into_deserializer();
-            Ok(try!(seed.deserialize(de)))
+            Ok(seed.deserialize(de)?)
         } else {
             Err(Error::EndOfStream)
         }

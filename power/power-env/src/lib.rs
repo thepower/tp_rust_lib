@@ -70,6 +70,21 @@ extern "C" {
     /// * False otherwise.
     pub fn get_balance_raw(dst: *mut u8) -> bool;
 
+    /// Returns entropy length.
+    pub fn get_entropy_size() -> usize;
+
+    /// Copies entropy to provided destination buffer.
+    ///
+    /// Use get_entropy_size to obtain required destination buffer's length.
+    ///
+    /// # Returns
+    ///
+    /// * True if entropy were successfully copied to destination buffer;
+    /// * False otherwise.
+    pub fn get_entropy(dst: *mut u8) -> bool;
+
+    /// Returns block's mean time
+    pub fn get_mean_time() -> u64;
 
     /// Sets return value.
     ///
