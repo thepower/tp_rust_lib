@@ -220,6 +220,12 @@ pub struct PayloadItem {
     pub amount: Amount,
 }
 
+impl PayloadItem {
+    pub fn new<C: Into<Vec<u8>>>(p: Purpose, curr: C, amount: u64) -> Self {
+        PayloadItem {purpose: p, amount: Amount { currency: curr.into(), amount: amount}}
+    }
+}
+
 impl From<PayloadItem> for Value {
     fn from(arg: PayloadItem) -> Self {
         let mut a = Vec::new();

@@ -206,11 +206,12 @@ pub struct TxEmitter {
     tx: Vec<(Value, Value)>,
     n: Vec<(Value, Value)>,
     e: Vec<(Value, Value)>,
+    p: Vec<Value>,
 }
 
 impl TxEmitter {
     pub fn new(kind: TxKind) -> TxEmitter {
-        let mut x = TxEmitter {tx: Vec::with_capacity(5), n: Vec::new(), e: Vec::new()};
+        let mut x = TxEmitter {tx: Vec::with_capacity(8), n: Vec::new(), e: Vec::new(), p: Vec::new()};
         x.tx.push(("k".into(), (kind as u64).into()));
         x
     }
@@ -220,8 +221,8 @@ impl TxEmitter {
         self
     }
 
-    pub fn payload(mut self, payload: Vec<PayloadItem>) -> Self {
-        self.tx.push(("p".into(), payload.into()));
+    pub fn payload(mut self, payload: PayloadItem) -> Self {
+        self.p.push(payload.into());
         self
     }
 
@@ -235,13 +236,13 @@ impl TxEmitter {
         self
     }
 
-    pub fn notify_url(mut self, url: &str, data: Vec<u8>) -> Self {
-        self.n.push((url.into(), Value::Binary(data)));
+    pub fn notify_url<T: Into<Vec<u8>>>(mut self, url: &str, data: T) -> Self {
+        self.n.push((url.into(), Value::Binary(data.into())));
         self
     }
 
-    pub fn notify(mut self, idx: u64, data: Vec<u8>) -> Self {
-        self.n.push((idx.into(), Value::Binary(data)));
+    pub fn notify<T: Into<Vec<u8>>>(mut self, idx: u64, data: T) -> Self {
+        self.n.push((idx.into(), Value::Binary(data.into())));
         self
     }
 
@@ -251,6 +252,7 @@ impl TxEmitter {
     }
 
     pub fn emit(mut self) {
+        self.tx.push(("p".into(), Value::Array(self.p).into()));
         if self.n.len() > 0 {
             self.tx.push(("ev".into(), self.n.into()));
         }
