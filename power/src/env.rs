@@ -204,7 +204,7 @@ pub fn emit_tx(
 
 pub struct TxEmitter {
     tx: Vec<(Value, Value)>,
-    n: Vec<(Value, Value)>,
+    n: Vec<Value>,
     e: Vec<(Value, Value)>,
     p: Vec<Value>,
 }
@@ -236,13 +236,13 @@ impl TxEmitter {
         self
     }
 
-    pub fn notify_url<T: Into<Vec<u8>>>(mut self, url: &str, data: T) -> Self {
-        self.n.push((url.into(), Value::Binary(data.into())));
+    pub fn notify_url_binary<T: Into<Vec<u8>>>(mut self, url: &str, data: T) -> Self {
+        self.n.push(Value::Map(vec![("u".into(), url.into()), ("ct".into(), "application/octet-stream".into()), ("d".into(), Value::Binary(data.into()))]));
         self
     }
 
-    pub fn notify<T: Into<Vec<u8>>>(mut self, idx: u64, data: T) -> Self {
-        self.n.push((idx.into(), Value::Binary(data.into())));
+    pub fn notify_url_json(mut self, url: &str, data: &str) -> Self {
+        self.n.push(Value::Map(vec![("u".into(), url.into()), ("ct".into(), "application/json".into()), ("d".into(), data.into())]));
         self
     }
 
